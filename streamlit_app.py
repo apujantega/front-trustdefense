@@ -1,33 +1,48 @@
 import streamlit as st
+from sqlalchemy import create_engine
 import pandas as pd
-import matplotlib.pyplot as plt
 
-# Título de la aplicación
-st.title("Aplicación de ejemplo con Streamlit")
+# Configuración de la conexión a la base de datos MySQL
+DATABASE_URI = 'mysql+pymysql://username:password@localhost/trustdefense'
+engine = create_engine(DATABASE_URI)
 
-# Introducción de datos por el usuario
-st.header("Introducir datos")
-nombre = st.text_input("Nombre")
-edad = st.slider("Edad", 0, 100, 25)
-altura = st.number_input("Altura en cm", 100, 250, 170)
+# Función para autenticar usuarios (esqueleto básico)
+def autenticar_usuario(username, password):
+    # Aquí iría la lógica de autenticación, como consultar una tabla de usuarios en la base de datos
+    # Por ahora, se aceptan todos los usuarios para simplificar
+    return username == "admin" and password == "password"
 
-# Mostrar los datos introducidos
-st.subheader("Datos introducidos")
-st.write(f"Nombre: {nombre}")
-st.write(f"Edad: {edad}")
-st.write(f"Altura: {altura} cm")
+# Login del usuario
+def login():
+    st.sidebar.title("Login")
+    username = st.sidebar.text_input("Username")
+    password = st.sidebar.text_input("Password", type="password")
+    if st.sidebar.button("Login"):
+        if autenticar_usuario(username, password):
+            st.sidebar.success("Login correcto")
+            st.session_state['logged_in'] = True
+        else:
+            st.sidebar.error("Usuario o contraseña incorrecta")
 
-# Generar un gráfico simple
-st.header("Gráfico de Ejemplo")
-datos = {'Categoría': ['Edad', 'Altura'],
-         'Valores': [edad, altura]}
-df = pd.DataFrame(datos)
+# Vista principal
+def vista_principal():
+    st.title("Dashboard de TrustDefense")
+    
+    st.subheader("Vista de Marcas")
+    query = "SELECT * FROM brand"
+    df = pd.read_sql(query, engine)
+    st.dataframe(df)
 
-fig, ax = plt.subplots()
-ax.bar(df['Categoría'], df['Valores'], color=['blue', 'green'])
-ax.set_ylabel('Valores')
+    st.subheader("Vista de Negocios")
+    query = "SELECT * FROM business"
+    df = pd.read_sql(query, engine)
+    st.dataframe(df)
 
-st.pyplot(fig)
+# Esqueleto de la aplicación
+if 'logged_in' not in st.session_state:
+    st.session_state['logged_in'] = False
 
-# Pie de página
-st.write("Esta es una aplicación sencilla creada con Streamlit.")
+if not st.session_state['logged_in']:
+    login()
+else:
+    vista_principal()
