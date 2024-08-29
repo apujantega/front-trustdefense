@@ -3,7 +3,7 @@ from sqlalchemy import create_engine
 import pandas as pd
 
 # Configuración de la conexión a la base de datos MySQL
-DATABASE_URI = 'mysql+pymysql://username:password@localhost/trustdefense'
+DATABASE_URI = 'mysql+pymysql://streamlit:346pX1ai@@panel3.vallcompanys.es/trustdefense'
 engine = create_engine(DATABASE_URI)
 
 # Función para autenticar usuarios (esqueleto básico)
